@@ -1,5 +1,7 @@
 # dom-event-to-css-variable.js
+
 Simple library to expose DOM event values as CSS Custom Properties (variables)
+
 See demo: https://dom-event-to-css-variable.glitch.me/
 
 ## Supported Features
