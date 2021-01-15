@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+
+  <title>dom-event-to-css-variable.js</title>
+  <style>
+    body {
+      font-family: Consolas, monospace;
+    }
+
+    .myElement {
+      --left: calc(var(--offset-x) * 1px);
+      --top: calc(var(--offset-y) * 1px);
+
+      width: 300px;
+      height: 300px;
+      border: 1px dashed black;
+      background-image:
+        linear-gradient(to bottom right,
+          rebeccapurple 0%,
+          yellow 50%,
+          white 100%);
+      background-position: var(--left) var(--top);
+      transition: background-position 500ms ease-in-out;
+    }
+
+    .myElement::before {
+      --last-left: calc(var(--last-click-x) * 1px);
+      --last-top: calc(var(--last-click-y) * 1px);
+
+      position: absolute;
+      content: "<" var(--node-name) ">" " (Type: " var(--node-type) ")";
+      margin: 0.5rem;
+      display: block;
+      left: var(--last-left);
+      top: var(--last-top);
+      transition: left 250ms ease-in-out, top 250ms ease-in-out;
+    }
+
+    .myElement::after {
+      display: inline-block;
+      content: attr(style);
+      font-size: 0.75em;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="myElement"></div>
+  <div>Tip: try double-clicking and single-clicking in the box above</div>
+  <h3>CSS</h3>
+  <pre>
+.myElement {
+  --left: calc(var(--offset-x) * 1px);
+  --top: calc(var(--offset-y) * 1px);
+
+  background-position: var(--left) var(--top);
+  transition: background-position 500ms ease-in-out;
+}
+
+.myElement:after {
+  --last-left: calc(var(--last-click-x) * 1px);
+  --last-top: calc(var(--last-click-y) * 1px);
+
+  position: absolute;
+  display: block;
+  content: "<" var(--node-name) ">" " (Type: " var(--node-type) ")";
+  left: var(--last-left);
+  top: var(--last-top);
+  transition: left 250ms ease-in-out, top 250ms ease-in-out;
+}
+    </pre>
+    <h3>JavaScript</h3>
+    <pre>
+const $domElement = document.querySelector('.myElement');
+// Get `offsetX/Y` for `mouseover`
+domEventToCSSVariable($domElement, 'offsetX');
+domEventToCSSVariable($domElement, 'offsetY');
+
+/* Custom CSS variable name (`last-click-` instead of `offset`),
+    trigger on `mousedown` instead of the default (`mousemove`)
+*/
+domEventToCSSVariable($domElement, 'offsetX', { event: 'mousedown', cssVarName: 'last-click-x' });
+domEventToCSSVariable($domElement, 'offsetY', { event: 'mousedown', cssVarName: 'last-click-y' });
+
+/* Use a custom CSS variable name (`width` instead of `offsetWidth`),
+    only trigger it once
+*/
+domEventToCSSVariable($domElement, 'offsetWidth', { once: true, cssVarName: 'width' });
+
+/* Get value of `noteType` (as a string), `nodeName` (not as a string) as `nodeNameNotString`, and `nodeName` (as a string, because that is its type)
+    on `$domElement`,
+    when `dblclick` is triggered (instead of the default `mousemove`),
+    only trigger once (value won't change in this example)
+*/
+domEventToCSSVariable($domElement, 'nodeType', { event: 'dblclick', stringify: true,  once: true });
+domEventToCSSVariable($domElement, 'nodeName', { event: 'dblclick', stringify: false, once: true, cssVarName: 'nodeNameNotString' });
+domEventToCSSVariable($domElement, 'nodeName', { event: 'dblclick', once: true });
+    </pre>
+  <script src="domEventToCSSVariable.js"></script>
+  <script>
+    const $domElement = document.querySelector('.myElement');
+    // Get `offsetX/Y` for `mouseover`
+    domEventToCSSVariable($domElement, 'offsetX');
+    domEventToCSSVariable($domElement, 'offsetY');
+
+    /* Custom CSS variable name (`last-click-` instead of `offset`),
+       trigger on `mousedown` instead of the default (`mousemove`)
+    */
+    domEventToCSSVariable($domElement, 'offsetX', { event: 'mousedown', cssVarName: 'last-click-x' });
+    domEventToCSSVariable($domElement, 'offsetY', { event: 'mousedown', cssVarName: 'last-click-y' });
+
+    /* Use a custom CSS variable name (`width` instead of `offsetWidth`),
+       only trigger it once
+    */
+    domEventToCSSVariable($domElement, 'offsetWidth', { once: true, cssVarName: 'width' });
+
+    /* Get value of `noteType` (as a string), `nodeName` (not as a string) as `nodeNameNotString`, and `nodeName` (as a string, because that is its type)
+       on `$domElement`,
+       when `dblclick` is triggered (instead of the default `mousemove`),
+       only trigger once (value won't change in this example)
+    */
+    domEventToCSSVariable($domElement, 'nodeType', { event: 'dblclick', stringify: true,  once: true });
+    domEventToCSSVariable($domElement, 'nodeName', { event: 'dblclick', stringify: false, once: true, cssVarName: 'nodeNameNotString' });
+    domEventToCSSVariable($domElement, 'nodeName', { event: 'dblclick', once: true });
+  </script>
+</body>
+
+</html>
