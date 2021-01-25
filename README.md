@@ -11,15 +11,18 @@ See demo: https://dom-event-to-css-variable.glitch.me/
 * Use a custom CSS Custom Property name (e.g. `--width` instead of `--offset-width`)
 * Listen for any event (default: `mousemove`)
 * Read values from the event (i.e. `offsetWidth`), or the element (i.e. `nodeName`)
-* Match variable type (string vs number) in CSS
-* Force variable type (e.g. number as string) in CSS - useful for showing numbers in pseudo-element `content`
+* Converts numbers in strings to number type in CSS - useful for showing numbers in pseudo-element `content`
+* Supports custom value transform functions: `tranformFn(val, el, e)`
 
 ## Options
 
 * `event` (`String`): name of the DOM event to listen for (default: `mousemove`)
-* `once` (`Boolean`): should the listener only fire once?
-* `stringify`: should the value be forced to a string (or not) in CSS? (Useful for show numeric values (e.g. `nodeType`) in CSS `content`)
-* `cssVarName`: change the CSS Custom Property (variable) name to a custom value (e.g. `--width` instead of `--offset-width`)
+* `once` (`Boolean`): should the listener only fire once? Better performance for values that won't change (e.g. element width, nodeType, etc).
+* `target` (`DOM element`): specify which target DOM element the CSS variables are set on
+* `cssVarName` (`String`): change the CSS Custom Property (variable) name to a custom value (e.g. `--width` instead of `--offset-width`)
+* `stringify` (`Boolean`): should the value be forced to a string (or not) in CSS? (Useful for show numeric values (e.g. `nodeType`) in CSS `content`)
+* `transform` (`function`): function that takes `value`, `element`, and `event` as input and returns the desired CSS variable value. e.g. `transformFn(value, element, event)`
+
 
 ## Why?
 
@@ -52,8 +55,15 @@ domEventToCSSVariable($domElement, 'offsetY');
 ##### JavaScript
 ```js
 /* Custom CSS variable name, trigger on `mousedown` instead of the default (`mousemove`) */
-domEventToCSSVariable($domElement, 'offsetX', {event: 'mousedown', cssVarName: 'last-click-x'});
-domEventToCSSVariable($domElement, 'offsetY', {event: 'mousedown', cssVarName: 'last-click-y'});
+domEventToCSSVariable($domElement, 'offsetX', {
+  event: 'mousedown',
+  cssVarName: 'last-click-x'
+});
+
+domEventToCSSVariable($domElement, 'offsetY', {
+  event: 'mousedown',
+  cssVarName: 'last-click-y'
+});
 ```
 
 ##### CSS
@@ -68,7 +78,10 @@ domEventToCSSVariable($domElement, 'offsetY', {event: 'mousedown', cssVarName: '
 ##### JavaScript
 ```js
 /* Use a custom CSS variable name, only trigger it once */
-domEventToCSSVariable($domElement, 'offsetWidth', {once: true, cssVarName: 'width'});
+domEventToCSSVariable($domElement, 'offsetWidth', {
+  once: true,
+  cssVarName: 'width'
+});
 ```
 
 ##### CSS
@@ -82,17 +95,32 @@ domEventToCSSVariable($domElement, 'offsetWidth', {once: true, cssVarName: 'widt
 #### Show what kind of node (`DIV`, `UL`, etc) the element is
 ##### JavaScript
 ```js
-/* Get value of `nodeName` and `nodeType` on `$domElement`, when `dblclick` is triggered (instead of the default `mousemove`), on trigger once (value won't change in this example) */
-domEventToCSSVariable($domElement, 'nodeName', {event: 'dblclick', once: true}); // `nodeName` will be a string in CSS because the value is a string
-domEventToCSSVariable($domElement, 'nodeType', {event: 'dblclick', once: true, stringify: true}); // `nodeType` will be a number in CSS because the value is a number
-domEventToCSSVariable($domElement, 'nodeType', {event: 'dblclick', once: true, stringify: true, cssVarName: 'nodeTypeString'}); // Force `nodeType` to be a string in CSS, inspite of it being a number
+/* Get value of `nodeName` and `nodeType` on `$domElement`, when `dblclick` is triggered (instead of the default `mousemove`), on trigger once (value won't change in this example), convert the value to lowercase */
+domEventToCSSVariable($domElement, 'nodeName', {
+  event: 'dblclick',
+  once: true,
+  transform: (val, el, e) => `<${val.toString().toLowerCase()}>`;
+}); // `nodeName` will be a lowercase string in CSS because the value is a string
+
+domEventToCSSVariable($domElement, 'nodeType', {
+  event: 'dblclick',
+  once: true,
+  stringify: true
+}); // `nodeType` will be a number in CSS because the value is a number
+
+domEventToCSSVariable($domElement, 'nodeType', {
+  event: 'dblclick',
+  once: true,
+  stringify: true,
+  cssVarName: 'nodeTypeString'
+}); // Force `nodeType` to be a string in CSS, inspite of it being a number
 ```
 
 ##### CSS
 ```css
 .myElement::after {
   /* Show what kind of node (DIV, UL, etc) the element is */
-  content: var(--nodeName);
+  content: var(--nodeName); /* e.g. <div> */
 }
 ```
 
